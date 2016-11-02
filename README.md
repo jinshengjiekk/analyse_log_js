@@ -1,2 +1,2 @@
 # analyse_log_js
-javascript分析日志
+javascript分析java堆栈日志（jstack)
