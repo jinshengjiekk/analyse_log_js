@@ -3,10 +3,19 @@
 <head>
 	<meta charset="UTF-8">
 	<title>js分析日志工具</title>
+	<link href="index.css" rel="stylesheet" type="text/css"/>
 </head>
 <body>
-<div id="test" style="width: 300px;height: 400px;"></div>
-
+<div id="main">
+	<div><span class="file-title">请选择需要分析java堆栈的文件：</span><input type="file" id="import-file" onchange="analysis(event)"
+																 multiple/></div>
+	<div><span class="keys-title">请输入需要过滤的关键字：</span><input type="text" id="keys-input"></div>
+	<div><span id="isOk"></span></div>
+	<div>
+		<section>过滤后的内容：</section>
+		<div id="filtered-content"></div>
+	</div>
+</div>
 <script type="text/javascript" src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <script type="text/javascript" src="index.js"></script>
 </body>
