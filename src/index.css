@@ -1,9 +1,37 @@
 
-#main{
-  line-height:30px;
+body{
+  text-align: center;
+}
+#main {
+  line-height: 30px;
+  width: 96%;
+  margin:auto;
 }
 
 #keys-input {
   width: 300px;
   border-radius: 2px;
+}
+
+#start-search{
+  margin-left:10px;
+}
+
+#filtered-content{
+  background-color: #b1f1fb;
+  text-align: left;
+  padding:0 5px;
+}
+
+#notice{
+  background-color: #cdd8d8;
+  font-size:14px;
+  line-height:1.5em;
+  width:600px;
+  margin:auto;
+}
+
+#caption{
+  font-size:18px;
+  font-weight:bold;
 }
