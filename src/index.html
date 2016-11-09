@@ -13,12 +13,11 @@
 
 	<div>
 		<div><span class="file-title">请选择需要分析的java堆栈文件：</span><input type="file" id="import-file"
-																	 onchange="analysis(event)"
 																	 multiple/></div>
 	</div>
 	<div id="file-info"></div>
 	<div><span class="keys-title">请输入需要过滤的关键字：</span><input type="text" id="keys-input">
-		<button id="start-search">确定</button>
+		<button id="start-search">确定</button> <input type="checkbox" value=true  id="gc">排除GC线程
 	</div>
 	<div id="notice">输入你要过滤的关键字，过滤后每个线程中将包含你输入的关键字；<br>输入 -v keyword 或者 keyword -v,过滤后的线程堆栈信息中将不包含keyword关键字；</div>
 	<div id="list-key"></div>

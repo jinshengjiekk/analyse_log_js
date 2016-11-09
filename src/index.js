@@ -1,28 +1,31 @@
-let content;
-let keysArr = [];
-let contentArr = [];
-let lastArr = [];
-function analysis(ele) {
-	let files = ele.target.files;
-	let selectedFile = files[0];
-	let name = selectedFile.name;
-	let size = Math.round(selectedFile.size/1024);
-	console.log("文件名:" + name + "大小：" + size);
-
-	let reader = new FileReader();//这里是核心
-	reader.readAsText(selectedFile);//读取文件的内容
-
-	reader.onload = function () {
-		content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
-		contentArr = content.split(/[\n|\r\n]{2,}/);
-		document.getElementById('file-info').innerHTML = `<div><span>文件名称：${name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span>文件大小:${size}KB</span></div>`;
-		document.getElementById('filtered-title').innerHTML = '原始内容：';
-		document.getElementById('filtered-content').innerHTML = content.replace(/[\r|\r\n]{2,}/g, '<br/><hr/>');
-	}
-}
-
 
 $(document).ready(function () {
+	let content;
+	let keysArr = [];
+	let contentArr = [];
+	let noGCcontentArr = [];
+	let targetArr = [];
+	let lastArr = [];
+
+	//监听上传文件变化
+	$('#import-file').change(function (event) {
+		let files = event.target.files;
+		let selectedFile = files[0];
+		let name = selectedFile.name;
+		let size = Math.round(selectedFile.size/1024);
+		console.log("文件名:" + name + "大小：" + size);
+
+		let reader = new FileReader();//这里是核心
+		reader.readAsText(selectedFile);//读取文件的内容
+
+		reader.onload = function () {
+			content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
+			contentArr = content.split(/[\n|\r\n]{2,}/);
+			noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
+			targetArr = contentArr;
+			$('#file-info').html(`<div><span>文件名称：${name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span>文件大小:${size}KB</span></div>`);
+		}
+	});
 
 	//点击确定开始搜索
 	$('#start-search').click(function () {
@@ -124,4 +127,6 @@ $(document).ready(function () {
 
 
 	});
+
+
 });
