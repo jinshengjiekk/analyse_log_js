@@ -121,11 +121,8 @@ $(document).ready(function () {
 	//监听键盘回车键，默认按下就是确定搜索
 	$(document).keydown(function (event) {
 		if (event.keyCode == 13) {
-			console.info('sdf');
 			$('#start-search').click();
 		}
-
-
 	});
 
 
