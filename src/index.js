@@ -6,7 +6,11 @@ $(document).ready(function () {
     let targetArr = [];
     let lastArr = [];
     let contentObj = {};
-    let colorArr = ['#b1f1fb', '#cdd8d8;','aquamarine','plum','bisque','darkgray','lawngreen','moccasin','thistle','skyblue'];
+    let colorArr = ['#b1f1fb', '#b582af', 'aquamarine', 'plum', 'bisque', 'darkgray', 'lawngreen', 'moccasin', 'thistle', 'skyblue'];
+    let colorsLength = 10;
+    let lastIndex = 0;
+
+    $('#keys-li').html(`==============暂无文件输入==============`);
 
     //监听上传文件变化
     $('#import-file').change(function (event) {
@@ -23,9 +27,22 @@ $(document).ready(function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
             noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
-            targetArr = contentArr;
+            targetArr = $('#gc').prop('checked') ? noGCcontentArr : contentArr;
             $('#file-info').html(`<div><span>文件名称：${name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span>文件大小:${size}KB</span></div>`);
+            $('#filtered-content').html('').css('backgroundColor', '');
+            $('#list-key').click();
         }
+    });
+
+    //监听"排除GC线程"checkbox点击事件
+    $('#gc').click(function () {
+        let isChecked = $(this).prop('checked');
+        if (isChecked) {
+            targetArr = noGCcontentArr;
+        } else {
+            targetArr = contentArr;
+        }
+        $('#list-key').click();
     });
 
     //点击确定开始搜索
@@ -49,9 +66,9 @@ $(document).ready(function () {
             return;
         }
         //没有直接replace是考虑到关键字中可能包含'-v'
-        if (key.startsWith('-v') || key.endsWith('-v')) {
+        if (key.startsWith('-v') || key.endsWith('-v') || key.startsWith('-V') || key.endsWith('-V')) {
             //标记过滤关键字取反
-            key = key.replace('-v', '').trim() + '&&&*** ';
+            key = key.replace(/\-v/i, '').trim() + '&&&*** ';
         } else {
             if (key.split(/\s+/).length > 1) {
                 alert(`关键字形式为:
@@ -79,68 +96,40 @@ $(document).ready(function () {
         $(':checked').each(function () {
             keysArr.push(this.value);
         });
-        if (keysArr.length == lastArr.length) {
-            return;
-        }
+        // if ($('input[name="key"]').length!== 0 && keysArr.length === lastArr.length) {
+        //     return;
+        // }
+        $('#filtered-content').html('').css('backgroundColor', '');
         lastArr = keysArr;
         filter(keysArr);
     });
 
     //过滤方法
-    function filter(keysArr) {
+    function filter(keysArr = []) {
+        contentObj = {};
         let filteredKeysArr;
         let leftOutput = '';
         let filteredContentArr = targetArr.filter((data)=>processMatch(data, keysArr));
         for (let data of filteredContentArr) {
             let matchArr = data.match(/"(.*)".*(nid=[\w]{6})/);
-            if(matchArr){
+            if (matchArr) {
                 contentObj[matchArr[1] + '(' + matchArr[2] + ')'] = data;
             }
         }
         filteredKeysArr = Object.keys(contentObj);
-        for(let data of filteredKeysArr){
+        leftOutput += `<p style="color: red; font-weight: bold">过滤后的线程数为：${filteredKeysArr.length}</p>`;
+        for (let data of filteredKeysArr) {
             leftOutput += `<li>${data}</li>`
         }
-        $('#keys-li').append(leftOutput);
-
-
-        // let regexpArr = [];
-        // let output = '';
-        // let result = '';
-        // for (let i of arr) {
-        // 	if (i.endsWith('&&&***')) {
-        // 		regexpArr.push(new RegExp('^((?!' + i.replace('&&&***', '') + ').)*$', 'gi'));
-        // 	} else {
-        // 		regexpArr.push(new RegExp(i, 'gi'));
-        // 	}
-        // }
-        //
-        // let filteredContentArr = contentArr.filter(function (data) {
-        // 	return processMatch(data, regexpArr);
-        // });
-        //
-        // for (let ele of filteredContentArr) {
-        // 	output += '<p>' + ele + '</p><hr>';
-        // }
-        // $('#filtered-title').html('');
-        // result = `<p>过滤后满足条件的线程数：${filteredContentArr.length}</p>` + output;
-        // $('#filtered-content').html(result);
-
+        if (!filteredContentArr.length) {
+            leftOutput = `**************过滤后无结果*************`;
+        }
+        $('#keys-li').html(leftOutput);
     }
-
-
-    // function processMatch(data, regexpArr) {
-    // 	for (let i of regexpArr) {
-    // 		if (!i.test(data.replace(/[\r|\r\n]/g, ''))) {
-    // 			return false;
-    // 		}
-    // 	}
-    // 	return true;
-    // }
 
     function processMatch(data, keysArr) {
         for (let i of keysArr) {
-            let result = i.includes('&&&***') ? !data.includes(i) : data.includes(i);
+            let result = i.includes('&&&***') ? !data.includes(i.replace('&&&***', '')) : data.includes(i);
             if (!result) {
                 return false;
             }
@@ -148,14 +137,16 @@ $(document).ready(function () {
         return true;
     }
 
-    $(document).on('click', 'li', function(){
-        let randomIndex = Math.round(Math.random() * 10);
+    //监听左侧li元素点击事件
+    $(document).on('click', 'li', function () {
+        lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
         $('#filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
-        $(this).css('backgroundColor', colorArr[randomIndex]);
-        $(this).siblings().css('backgroundColor', '#cdd8d8');
-        $('#filtered-content').css('backgroundColor', colorArr[randomIndex]);
+        $(this).css('backgroundColor', colorArr[lastIndex]);
+        $(this).siblings().css('backgroundColor', '#ececec');
+        $('#filtered-content').css('backgroundColor', colorArr[lastIndex]);
     });
+
 
     //监听键盘回车键，默认按下就是确定搜索
     $(document).keydown(function (event) {

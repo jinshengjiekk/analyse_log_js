@@ -23,9 +23,11 @@ body {
   position: fixed;
   width: 75%;
   margin-left: 25%;
+  margin-top: 2%;
   height: 600px;
-  overflow: scroll;
-  line-height: 1.2em;
+  overflow-y: scroll;
+  line-height: 1.5em;
+  padding: 15px;
 }
 
 #notice {
@@ -45,10 +47,11 @@ body {
   float: left;
   word-break: break-all;
   width: 25%;
-  background-color: #cdd8d8;
+  background-color: #ececec;
 }
 
 #keys-li li:hover {
-  background-color: burlywood;
+  color: #e40a0a;
   cursor: pointer;
+  font-weight: bold;
 }
