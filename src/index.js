@@ -1,8 +1,8 @@
-$(document).ready(function () {
+$(document).ready(()=> {
 
     //检测浏览器是否支持HTML5 File API
-    (()=>{
-        if(window.File && window.FileList && window.FileReader && window.Blob) {
+    (()=> {
+        if (window.File && window.FileList && window.FileReader && window.Blob) {
             console.info('support!');
         } else {
             alert("你的浏览器暂不支持HTML5 File接口，无法继续操作，请更换其他最新版本浏览器，推荐Chrome，Firefox");
@@ -23,7 +23,7 @@ $(document).ready(function () {
     $('#keys-li').html(`==========暂无文件输入==========`);
 
     //监听上传文件变化
-    $('#import-file').change(function (event) {
+    $('#import-file').change((event) => {
         let files = event.target.files;
         let selectedFile = files[0];
         let name = selectedFile.name;
@@ -31,7 +31,7 @@ $(document).ready(function () {
         let reader = new FileReader();//这里是核心
         reader.readAsText(selectedFile);//读取文件的内容
 
-        reader.onload = function () {
+        reader.onload = () => {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
             noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
@@ -43,7 +43,7 @@ $(document).ready(function () {
     });
 
     //监听"排除GC线程"checkbox点击事件
-    $('#gc').click(function () {
+    $('#gc').click(()=> {
         let isChecked = $(this).prop('checked');
         if (isChecked) {
             targetArr = noGCcontentArr;
@@ -54,7 +54,7 @@ $(document).ready(function () {
     });
 
     //点击确定开始搜索
-    $('#start-search').click(function () {
+    $('#start-search').click(()=> {
         let showKey;
         if (!content) {
             alert('请选择要分析的java堆栈文本文件！');
@@ -100,12 +100,12 @@ $(document).ready(function () {
     });
 
     //利用冒泡机制监听动态生成的复选框上层div的click事件
-    $('#list-key').click(function (event) {
+    $('#list-key').click((event)=> {
         if ($(event.target).text() === '删除' || event.target.localName === 'span') {
             return;
         }
         let keysArrChecked = [];
-        $('[name="key"]:checked').each(function () {
+        $('[name="key"]:checked').each(()=> {
             keysArrChecked.push(this.value);
         });
         $('#filtered-content').html('').css('backgroundColor', '');
@@ -147,20 +147,20 @@ $(document).ready(function () {
     }
 
     //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件
-    $(document).on('click', 'li', function () {
+    $(document).on('click', 'li', ()=> {
         lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
         $('#filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
         $(this).css('backgroundColor', colorArr[lastIndex]);
         $('#filtered-content').css('backgroundColor', colorArr[lastIndex]);
         $(this).siblings().css('backgroundColor', '#ececec');
-    }).on('mouseenter mouseleave', '.keywords', function (event) {
+    }).on('mouseenter mouseleave', '.keywords', (event)=> {
         if (event.type === 'mouseenter') {
             $(this).children('button').css('visibility', 'visible');
         } else {
             $(this).children('button').css('visibility', 'hidden');
         }
-    }).on('click', '.deleteKey', function () {
+    }).on('click', '.deleteKey', ()=> {
         let deleteValue = $(this).prev('span').text().replace(/\n/, '');
         if (deleteValue.startsWith('-v') || deleteValue.endsWith('-v') || deleteValue.startsWith('-V') || deleteValue.endsWith('-V')) {
             deleteValue = deleteValue.replace(/\-v/i, '').trim() + '&&&*** ';
@@ -172,7 +172,7 @@ $(document).ready(function () {
 
 
     //监听键盘回车键，默认按下就是确定搜索
-    $(document).keydown(function (event) {
+    $(document).keydown((event) => {
         if (event.keyCode == 13) {
             $('#start-search').click();
         }
