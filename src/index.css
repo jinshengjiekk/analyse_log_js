@@ -20,11 +20,10 @@ body {
 
 #filtered-content {
   text-align: left;
-  position: fixed;
+  position: absolute;
   width: 65%;
   margin-left: 30%;
   margin-top: 2%;
-  height: 350px;
   overflow-y: scroll;
   line-height: 1.5em;
   padding: 15px;
