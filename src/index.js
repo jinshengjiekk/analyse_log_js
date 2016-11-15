@@ -2,11 +2,14 @@ $(document).ready(()=> {
 
     //检测浏览器是否支持HTML5 File API
     (()=> {
+        let close;
         if (window.File && window.FileList && window.FileReader && window.Blob) {
             console.info('support!');
         } else {
-            alert("你的浏览器暂不支持HTML5 File接口，无法继续操作，请更换其他最新版本浏览器，推荐Chrome，Firefox");
+            confirm("你的浏览器暂不支持HTML5 File接口，无法继续操作，请更换其他最新版本浏览器，推荐Chrome，Firefox");
+            window.close();
         }
+
     })();
 
     //全局变量
@@ -16,7 +19,7 @@ $(document).ready(()=> {
     let noGCcontentArr = [];
     let targetArr = [];
     let contentObj = {};
-    let colorArr = ['#b1f1fb', '#b582af', 'aquamarine', 'plum', 'bisque', 'darkgray', 'lawngreen', 'moccasin', 'thistle', 'skyblue'];
+    let colorArr = ['#b1f1fb', '#b582af', '#84a59a', '#b9a0b9', '#b5aea5', 'darkgray', '#a9d084', 'moccasin', 'thistle', '#8ab6c8'];
     let colorsLength = 10;
     let lastIndex = 0;
     let fileInfos = '';
