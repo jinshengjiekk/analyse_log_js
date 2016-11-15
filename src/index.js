@@ -19,31 +19,39 @@ $(document).ready(()=> {
     let colorArr = ['#b1f1fb', '#b582af', 'aquamarine', 'plum', 'bisque', 'darkgray', 'lawngreen', 'moccasin', 'thistle', 'skyblue'];
     let colorsLength = 10;
     let lastIndex = 0;
+    let fileInfos = '';
+    let files;
 
     $('#keys-li').html(`==========暂无文件输入==========`);
 
     //监听上传文件变化
-    $('#import-file').change((event) => {
-        let files = event.target.files;
-        let selectedFile = files[0];
-        let name = selectedFile.name;
-        let size = Math.round(selectedFile.size / 1024);
-        let reader = new FileReader();//这里是核心
-        reader.readAsText(selectedFile);//读取文件的内容
+    $('#import-file').change(()=> {
+        files = $('#import-file')[0].files;
+        for (let i = 0, file; file = files[i]; i++) {
+            fileInfos += `<span class="file-info"><input type="checkbox" name= "info" value=${i}><span>${file.name}(大小${Math.round(file.size / 1024)}KB)</span></span>`;
+        }
+        $('#file-info').html(fileInfos);
+        $('input[name="info"]').first().prop('checked', true);
+        processFile();
+    });
 
-        reader.onload = () => {
+
+    function processFile(index = 0) {
+        let reader = new FileReader();//这里是核心
+        reader.readAsText(files[index]);//读取文件的内容
+
+        reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
             noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
             targetArr = $('#gc').prop('checked') ? noGCcontentArr : contentArr;
-            $('#file-info').html(`<div><span>文件名称：${name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<span>文件大小:${size}KB</span></div>`);
             $('#filtered-content').html('').css('backgroundColor', '');
             $('#list-key').click();
         }
-    });
+    }
 
     //监听"排除GC线程"checkbox点击事件
-    $('#gc').click(()=> {
+    $('#gc').click(function () {
         let isChecked = $(this).prop('checked');
         if (isChecked) {
             targetArr = noGCcontentArr;
@@ -100,12 +108,12 @@ $(document).ready(()=> {
     });
 
     //利用冒泡机制监听动态生成的复选框上层div的click事件
-    $('#list-key').click((event)=> {
+    $('#list-key').click(function (event) {
         if ($(event.target).text() === '删除' || event.target.localName === 'span') {
             return;
         }
         let keysArrChecked = [];
-        $('[name="key"]:checked').each(()=> {
+        $('[name="key"]:checked').each(function () {
             keysArrChecked.push(this.value);
         });
         $('#filtered-content').html('').css('backgroundColor', '');
@@ -147,20 +155,20 @@ $(document).ready(()=> {
     }
 
     //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件
-    $(document).on('click', 'li', ()=> {
+    $(document).on('click', 'li', function () {
         lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
         $('#filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
         $(this).css('backgroundColor', colorArr[lastIndex]);
         $('#filtered-content').css('backgroundColor', colorArr[lastIndex]);
         $(this).siblings().css('backgroundColor', '#ececec');
-    }).on('mouseenter mouseleave', '.keywords', (event)=> {
+    }).on('mouseenter mouseleave', '.keywords', function (event) {
         if (event.type === 'mouseenter') {
             $(this).children('button').css('visibility', 'visible');
         } else {
             $(this).children('button').css('visibility', 'hidden');
         }
-    }).on('click', '.deleteKey', ()=> {
+    }).on('click', '.deleteKey', function () {
         let deleteValue = $(this).prev('span').text().replace(/\n/, '');
         if (deleteValue.startsWith('-v') || deleteValue.endsWith('-v') || deleteValue.startsWith('-V') || deleteValue.endsWith('-V')) {
             deleteValue = deleteValue.replace(/\-v/i, '').trim() + '&&&*** ';
@@ -168,6 +176,14 @@ $(document).ready(()=> {
         $(this).parent('.keywords').remove();
         keysArr = keysArr.filter((data)=> deleteValue !== data);
         $('#list-key').click();
+    }).on('change', 'input[name="info"]', function () {
+        if (!$('input[name="info"]:checked').length) {
+            $(this).prop('checked', true);
+            return;
+        }
+        let index = $(this).val();
+        $(this).parent('span').siblings().children('input').prop('checked', false);
+        processFile(index);
     });
 
 
