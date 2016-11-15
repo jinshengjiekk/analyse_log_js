@@ -1,16 +1,26 @@
 $(document).ready(function () {
+
+    //检测浏览器是否支持HTML5 File API
+    (()=>{
+        if(window.File && window.FileList && window.FileReader && window.Blob) {
+            console.info('support!');
+        } else {
+            alert("你的浏览器暂不支持HTML5 File接口，无法继续操作，请更换其他最新版本浏览器，推荐Chrome，Firefox");
+        }
+    })();
+
+    //全局变量
     let content;
     let keysArr = [];
     let contentArr = [];
     let noGCcontentArr = [];
     let targetArr = [];
-    let lastArr = [];
     let contentObj = {};
     let colorArr = ['#b1f1fb', '#b582af', 'aquamarine', 'plum', 'bisque', 'darkgray', 'lawngreen', 'moccasin', 'thistle', 'skyblue'];
     let colorsLength = 10;
     let lastIndex = 0;
 
-    $('#keys-li').html(`==============暂无文件输入==============`);
+    $('#keys-li').html(`==========暂无文件输入==========`);
 
     //监听上传文件变化
     $('#import-file').change(function (event) {
@@ -18,8 +28,6 @@ $(document).ready(function () {
         let selectedFile = files[0];
         let name = selectedFile.name;
         let size = Math.round(selectedFile.size / 1024);
-        console.log("文件名:" + name + "大小：" + size);
-
         let reader = new FileReader();//这里是核心
         reader.readAsText(selectedFile);//读取文件的内容
 
@@ -84,24 +92,24 @@ $(document).ready(function () {
             return;
         } else {
             keysArr.push(key);
-            $('#list-key').append(`<input type="checkbox" name= "key" value=${key} checked><span>${showKey}</span>`).click();
+            $('#list-key').append(`<span class="keywords"><input type="checkbox" name= "key" value=${key} checked>
+                <span>${showKey}</span><button class="deleteKey" style="margin-left: 5px; background-color: lightcoral; visibility: hidden">删除</button></span>`).click();
         }
 
         $('#keys-input').val('');
     });
 
     //利用冒泡机制监听动态生成的复选框上层div的click事件
-    $('#list-key').click(function () {
-        let keysArr = [];
-        $(':checked').each(function () {
-            keysArr.push(this.value);
+    $('#list-key').click(function (event) {
+        if ($(event.target).text() === '删除' || event.target.localName === 'span') {
+            return;
+        }
+        let keysArrChecked = [];
+        $('[name="key"]:checked').each(function () {
+            keysArrChecked.push(this.value);
         });
-        // if ($('input[name="key"]').length!== 0 && keysArr.length === lastArr.length) {
-        //     return;
-        // }
         $('#filtered-content').html('').css('backgroundColor', '');
-        lastArr = keysArr;
-        filter(keysArr);
+        filter(keysArrChecked);
     });
 
     //过滤方法
@@ -122,11 +130,12 @@ $(document).ready(function () {
             leftOutput += `<li>${data}</li>`
         }
         if (!filteredContentArr.length) {
-            leftOutput = `**************过滤后无结果*************`;
+            leftOutput = `**********过滤后无结果*********`;
         }
         $('#keys-li').html(leftOutput);
     }
 
+    //关键字匹配
     function processMatch(data, keysArr) {
         for (let i of keysArr) {
             let result = i.includes('&&&***') ? !data.includes(i.replace('&&&***', '')) : data.includes(i);
@@ -137,14 +146,28 @@ $(document).ready(function () {
         return true;
     }
 
-    //监听左侧li元素点击事件
+    //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件
     $(document).on('click', 'li', function () {
         lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
         $('#filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
         $(this).css('backgroundColor', colorArr[lastIndex]);
-        $(this).siblings().css('backgroundColor', '#ececec');
         $('#filtered-content').css('backgroundColor', colorArr[lastIndex]);
+        $(this).siblings().css('backgroundColor', '#ececec');
+    }).on('mouseenter mouseleave', '.keywords', function (event) {
+        if (event.type === 'mouseenter') {
+            $(this).children('button').css('visibility', 'visible');
+        } else {
+            $(this).children('button').css('visibility', 'hidden');
+        }
+    }).on('click', '.deleteKey', function () {
+        let deleteValue = $(this).prev('span').text().replace(/\n/, '');
+        if (deleteValue.startsWith('-v') || deleteValue.endsWith('-v') || deleteValue.startsWith('-V') || deleteValue.endsWith('-V')) {
+            deleteValue = deleteValue.replace(/\-v/i, '').trim() + '&&&*** ';
+        }
+        $(this).parent('.keywords').remove();
+        keysArr = keysArr.filter((data)=> deleteValue !== data);
+        $('#list-key').click();
     });
 
 

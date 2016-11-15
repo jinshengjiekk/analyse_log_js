@@ -21,10 +21,10 @@ body {
 #filtered-content {
   text-align: left;
   position: fixed;
-  width: 75%;
-  margin-left: 25%;
+  width: 65%;
+  margin-left: 30%;
   margin-top: 2%;
-  height: 600px;
+  height: 350px;
   overflow-y: scroll;
   line-height: 1.5em;
   padding: 15px;
@@ -44,9 +44,10 @@ body {
 }
 
 #filtered-title {
+  margin-top: 2%;
   float: left;
   word-break: break-all;
-  width: 25%;
+  width: 30%;
   background-color: #ececec;
 }
 
@@ -54,4 +55,12 @@ body {
   color: #e40a0a;
   cursor: pointer;
   font-weight: bold;
+}
+
+.keywords {
+  margin: 0 5px;
+}
+
+#list-key {
+  margin-top: 10px;
 }
