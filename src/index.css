@@ -18,12 +18,11 @@ body {
   margin-left: 10px;
 }
 
-#filtered-content {
+.filtered-content {
   text-align: left;
-  position: absolute;
   width: 65%;
-  margin-left: 30%;
-  margin-top: 2%;
+  margin-left: 31%;
+  margin-top: 1%;
   overflow: auto;
   line-height: 1.5em;
   padding: 15px;
@@ -43,15 +42,14 @@ body {
   font-weight: bold;
 }
 
-#filtered-title {
-  margin-top: 2%;
+.filtered-title {
   float: left;
   word-break: break-all;
   width: 30%;
   background-color: #ececec;
 }
 
-#keys-li li:hover {
+.keys-li li:hover {
   color: #e40a0a;
   cursor: pointer;
   font-weight: bold;

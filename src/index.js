@@ -27,14 +27,16 @@ $(document).ready(()=> {
     let files = [];
     let targetFileIndex = 0;
     let isComparison = false;
+    let tempIndexs = [];
+    let tempIndex;
 
-    $('#keys-li').html(`==========暂无文件输入==========`);
+    $('.keys-li').html(`==========暂无文件输入==========`);
 
     //监听上传文件变化
     $('#import-file').change(()=> {
         files = $('#import-file')[0].files;
         for (let i = 0, file; file = files[i]; i++) {
-            fileInfos += `<span class="file-info"><input type="checkbox" name= "info" value=${i} /><span>${file.name}(大小${Math.round(file.size / 1024)}KB)</span></span>`;
+            fileInfos += `<span class="file-info"><input type="checkbox" name= "info" value=${i} /><span>${file.name}(${Math.round(file.size / 1024)}KB)</span></span>`;
         }
         $('#file-info').html(fileInfos);
         $('input[name="info"]').first().prop('checked', true);
@@ -43,20 +45,28 @@ $(document).ready(()=> {
 
 
     function processFile(index = 0) {
+        tempIndexs.push(index);
         let reader = new FileReader();//这里是核心
         reader.readAsText(files[index]);//读取文件的内容
 
         reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
-            $('#filtered-content').html('').css('backgroundColor', '');
             $('#list-key').click();
         }
     }
 
     //监听多文件对比模式
     $('#isComparison').click(function () {
+        if (!files.length) {
+            alert('请选择要分析的java堆栈文本文件！');
+            $(this).prop('checked', !$(this).prop('checked'));
+            return;
+        }
         isComparison = !isComparison;
+        $('input[name="info"]:checked').first().parent().siblings().children('input').prop('checked', false);
+        targetFileIndex = $('input[name="info"]:checked').val();
+        processFile(targetFileIndex);
     });
 
     //监听默认排除关键字的点击事件
@@ -88,28 +98,11 @@ $(document).ready(()=> {
             alert('关键字不能为空！');
             return;
         }
-        //
-        // if (key.split(/\s+/).length > 2) {
-        //     alert(`关键字形式为:
-        //                 1: keyword(包含）
-        //                 2: -v keyword 或者 keyword -v(取反，不包含)`);
-        //     return;
-        // }
         //没有直接replace是考虑到关键字中可能包含'-v'
         if (key.startsWith('-v') || key.endsWith('-v') || key.startsWith('-V') || key.endsWith('-V')) {
             //标记过滤关键字取反
             key = key.replace(/\-v/i, '').trim() + '&&&***';
         }
-        // else {
-        //     if (key.split(/\s+/).length > 1) {
-        //         alert(`关键字形式为:
-        //                 1: keyword(包含）
-        //                 2: -v keyword 或者 keyword -v(取反，不包含)`);
-        //         return;
-        //     }
-        // }
-
-
         if (keysArr.includes(key)) {
             alert('关键字已存在！');
             return;
@@ -138,13 +131,13 @@ $(document).ready(()=> {
             }
             keysArrChecked.push(selectedKey);
         });
-        $('#filtered-content').html('').css('backgroundColor', '');
         filter(keysArrChecked);
     });
 
     //过滤方法
     function filter(keysArr = []) {
         contentObj = {};
+        tempIndex = tempIndexs.shift();
         let filteredKeysArr;
         let leftOutput = '';
         let filteredContentArr = contentArr.filter((data)=>processMatch(data, keysArr));
@@ -155,15 +148,22 @@ $(document).ready(()=> {
             }
         }
         filteredKeysArr = Object.keys(contentObj);
-        leftOutput += `<p style="color: red; font-weight: bold">文件<span style="color: black">${files[targetFileIndex].name}</span>过滤后的线程数为：${filteredKeysArr.length}</p>`;
+        leftOutput += `<p style="color: red; font-weight: bold">文件<span style="color: black">${files[tempIndex].name}</span>过滤后的线程数为：${filteredKeysArr.length}</p>`;
         for (let data of filteredKeysArr) {
             leftOutput += `<li>${data}</li>`
         }
         if (!filteredContentArr.length) {
             leftOutput = `**********过滤后无结果*********`;
         }
-        $('#keys-li').html(leftOutput);
-        $('li').first().click();
+
+        if ($('input[name="info"]:checked').first().val() == tempIndex) {
+            $('.keys-li').first().siblings().remove();
+            $('.keys-li').html(leftOutput);
+
+        } else {
+            $('.keys-li').first().clone().html(`<hr/>${leftOutput}`).appendTo('.filtered-title');
+        }
+        $('.keys-li li').first().click();
     }
 
     //关键字匹配
@@ -178,12 +178,18 @@ $(document).ready(()=> {
     }
 
     //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件 上传的文件改变
-    $(document).on('click', 'li', function () {
+    $(document).on('click', '.keys-li li', function () {
         lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
-        $('#filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
+        if ($('input[name="info"]:checked').first().val() == tempIndex) {
+            $('.filtered-content').first().nextAll().remove();
+            $('.filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
+
+        } else {
+            $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br>")).appendTo('.right-main');
+        }
         $(this).css('backgroundColor', colorArr[lastIndex]);
-        $('#filtered-content').css('backgroundColor', colorArr[lastIndex]);
+        $('.filtered-content').css('backgroundColor', colorArr[lastIndex]);
         $(this).siblings().css('backgroundColor', '#ececec');
     }).on('mouseenter mouseleave', '.keywords', function (event) {
         if (event.type === 'mouseenter') {
@@ -207,15 +213,13 @@ $(document).ready(()=> {
             if (!isComparison) {
                 $(this).parent('span').siblings().children('input').prop('checked', false);
             }
+            tempIndex = $('input[name="info"]:checked').first().val();
             $('input[name="info"]:checked').each(function () {
                 targetFileIndex = $(this).val();
                 processFile(targetFileIndex);
             })
         }
-
-
     });
-
 
     //监听键盘回车键，默认按下就是确定搜索
     $(document).keydown((event) => {
