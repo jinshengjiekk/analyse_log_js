@@ -64,6 +64,10 @@ body {
   margin-top: 10px;
 }
 
-.file-info{
+.file-info {
   margin: 0 10px;
+}
+
+.exclude {
+  margin: 10px;
 }

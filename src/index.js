@@ -15,9 +15,10 @@ $(document).ready(()=> {
     //全局变量
     let content;
     let keysArr = [];
+    let DefaultKeys = ['GC task&&&***', 'Attach Listener&&&***', 'sun.nio.ch.EPollArrayWrapper.epollWait&&&***', 'com.mysql.jdbc.MysqlIO.readFully&&&***'];
     let contentArr = [];
-    let noGCcontentArr = [];
-    let targetArr = [];
+    // let noGCcontentArr = [];
+    // let targetArr = [];
     let contentObj = {};
     let colorArr = ['#90BAE4', '#bbc591', '#84a59a', '#b9a0b9', '#b5aea5', '#8bb9b2', '#a9d084', 'moccasin', 'thistle', '#a1b16e'];
     let colorsLength = 10;
@@ -46,20 +47,33 @@ $(document).ready(()=> {
         reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
-            noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
-            targetArr = $('#gc').prop('checked') ? noGCcontentArr : contentArr;
+            // noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
+            // targetArr = $('#gc').prop('checked') ? noGCcontentArr : contentArr;
             $('#filtered-content').html('').css('backgroundColor', '');
             $('#list-key').click();
         }
     }
 
-    //监听"排除GC线程"checkbox点击事件
-    $('#gc').click(function () {
-        let isChecked = $(this).prop('checked');
-        if (isChecked) {
-            targetArr = noGCcontentArr;
+    /*
+     //监听"排除GC线程"checkbox点击事件
+     $('#gc').click(function () {
+     let isChecked = $(this).prop('checked');
+     if (isChecked) {
+     targetArr = noGCcontentArr;
+     } else {
+     targetArr = contentArr;
+     }
+     $('#list-key').click();
+     });
+     */
+
+    //监听默认排除关键字的点击事件
+    $('.exclude').click(function () {
+        let value = this.value + '&&&***';
+        if ($(this).prop('checked')) {
+            DefaultKeys.push(value);
         } else {
-            targetArr = contentArr;
+            DefaultKeys = DefaultKeys.filter((data) => data !== value);
         }
         $('#list-key').click();
     });
@@ -87,7 +101,7 @@ $(document).ready(()=> {
         //没有直接replace是考虑到关键字中可能包含'-v'
         if (key.startsWith('-v') || key.endsWith('-v') || key.startsWith('-V') || key.endsWith('-V')) {
             //标记过滤关键字取反
-            key = key.replace(/\-v/i, '').trim() + '&&&*** ';
+            key = key.replace(/\-v/i, '').trim() + '&&&***';
         } else {
             if (key.split(/\s+/).length > 1) {
                 alert(`关键字形式为:
@@ -115,7 +129,7 @@ $(document).ready(()=> {
         if ($(event.target).text() === '删除' || event.target.localName === 'span') {
             return;
         }
-        let keysArrChecked = [];
+        let keysArrChecked = [].concat(DefaultKeys);
         $('[name="key"]:checked').each(function () {
             keysArrChecked.push(this.value);
         });
@@ -128,7 +142,7 @@ $(document).ready(()=> {
         contentObj = {};
         let filteredKeysArr;
         let leftOutput = '';
-        let filteredContentArr = targetArr.filter((data)=>processMatch(data, keysArr));
+        let filteredContentArr = contentArr.filter((data)=>processMatch(data, keysArr));
         for (let data of filteredContentArr) {
             let matchArr = data.match(/"(.*)".*(nid=[\w]{6})/);
             if (matchArr) {
@@ -144,6 +158,7 @@ $(document).ready(()=> {
             leftOutput = `**********过滤后无结果*********`;
         }
         $('#keys-li').html(leftOutput);
+        $('li').first().click();
     }
 
     //关键字匹配
@@ -174,7 +189,7 @@ $(document).ready(()=> {
     }).on('click', '.deleteKey', function () {
         let deleteValue = $(this).prev('span').text().replace(/\n/, '');
         if (deleteValue.startsWith('-v') || deleteValue.endsWith('-v') || deleteValue.startsWith('-V') || deleteValue.endsWith('-V')) {
-            deleteValue = deleteValue.replace(/\-v/i, '').trim() + '&&&*** ';
+            deleteValue = deleteValue.replace(/\-v/i, '').trim() + '&&&***';
         }
         $(this).parent('.keywords').remove();
         keysArr = keysArr.filter((data)=> deleteValue !== data);
