@@ -15,7 +15,8 @@ $(document).ready(()=> {
     //全局变量
     let content;
     let keysArr = [];
-    let DefaultKeys = ['GC task&&&***', 'Attach Listener&&&***', 'sun.nio.ch.EPollArrayWrapper.epollWait&&&***', 'com.mysql.jdbc.MysqlIO.readFully&&&***'];
+    let DefaultKeys = ['GC task&&&***', 'Attach Listener&&&***', 'sun.nio.ch.EPollArrayWrapper.epollWait&&&***',
+        'com.mysql.jdbc.MysqlIO.readFully&&&***', 'java.lang.Thread.State: TIMED_WAITING&&&***', 'java.lang.Thread.State: WAITING&&&***'];
     let contentArr = [];
     // let noGCcontentArr = [];
     // let targetArr = [];

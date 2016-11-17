@@ -24,9 +24,10 @@ body {
   width: 65%;
   margin-left: 30%;
   margin-top: 2%;
-  overflow-y: scroll;
+  overflow: auto;
   line-height: 1.5em;
   padding: 15px;
+  white-space: nowrap;
 }
 
 #notice {
