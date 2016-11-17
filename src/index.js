@@ -11,7 +11,7 @@ $(document).ready(()=> {
 
     })();
 
-//========================================================================================================================
+    //========================================================================================================================
 
     //全局变量
     let content;
@@ -24,7 +24,9 @@ $(document).ready(()=> {
     let colorsLength = 10;
     let lastIndex = 0;
     let fileInfos = '';
-    let files;
+    let files = [];
+    let targetFileIndex = 0;
+    let isComparison = false;
 
     $('#keys-li').html(`==========暂无文件输入==========`);
 
@@ -32,7 +34,7 @@ $(document).ready(()=> {
     $('#import-file').change(()=> {
         files = $('#import-file')[0].files;
         for (let i = 0, file; file = files[i]; i++) {
-            fileInfos += `<span class="file-info"><input type="checkbox" name= "info" value=${i}><span>${file.name}(大小${Math.round(file.size / 1024)}KB)</span></span>`;
+            fileInfos += `<span class="file-info"><input type="checkbox" name= "info" value=${i} /><span>${file.name}(大小${Math.round(file.size / 1024)}KB)</span></span>`;
         }
         $('#file-info').html(fileInfos);
         $('input[name="info"]').first().prop('checked', true);
@@ -52,8 +54,18 @@ $(document).ready(()=> {
         }
     }
 
+    //监听多文件对比模式
+    $('#isComparison').click(function () {
+        isComparison = !isComparison;
+    });
+
     //监听默认排除关键字的点击事件
     $('.exclude').click(function () {
+        if (!files.length) {
+            alert('请选择要分析的java堆栈文本文件！');
+            $(this).prop('checked', !$(this).prop('checked'));
+            return;
+        }
         let value = this.value + '&&&***';
         if ($(this).prop('checked')) {
             DefaultKeys.push(value);
@@ -103,7 +115,7 @@ $(document).ready(()=> {
             return;
         } else {
             keysArr.push(key);
-            let plusElement = $(`<span class="keywords"><input type="checkbox" name= "key" checked>
+            let plusElement = $(`<span class="keywords"><input type="checkbox" name= "key" checked />
                 <span>${showKey}</span><button class="deleteKey" style="margin-left: 5px; background-color: lightcoral; visibility: hidden">删除</button></span>`);
             plusElement.val(key);
             $('#list-key').append(plusElement).click();
@@ -143,7 +155,7 @@ $(document).ready(()=> {
             }
         }
         filteredKeysArr = Object.keys(contentObj);
-        leftOutput += `<p style="color: red; font-weight: bold">过滤后的线程数为：${filteredKeysArr.length}</p>`;
+        leftOutput += `<p style="color: red; font-weight: bold">文件<span style="color: black">${files[targetFileIndex].name}</span>过滤后的线程数为：${filteredKeysArr.length}</p>`;
         for (let data of filteredKeysArr) {
             leftOutput += `<li>${data}</li>`
         }
@@ -191,10 +203,17 @@ $(document).ready(()=> {
         if (!$('input[name="info"]:checked').length) {
             $(this).prop('checked', true);
             return;
+        } else {
+            if (!isComparison) {
+                $(this).parent('span').siblings().children('input').prop('checked', false);
+            }
+            $('input[name="info"]:checked').each(function () {
+                targetFileIndex = $(this).val();
+                processFile(targetFileIndex);
+            })
         }
-        let index = $(this).val();
-        $(this).parent('span').siblings().children('input').prop('checked', false);
-        processFile(index);
+
+
     });
 
 
@@ -204,6 +223,4 @@ $(document).ready(()=> {
             $('#start-search').click();
         }
     });
-
-
 });
