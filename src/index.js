@@ -2,7 +2,6 @@ $(document).ready(()=> {
 
     //检测浏览器是否支持HTML5 File API
     (()=> {
-        let close;
         if (window.File && window.FileList && window.FileReader && window.Blob) {
             console.info('support!');
         } else {
@@ -12,14 +11,14 @@ $(document).ready(()=> {
 
     })();
 
+//========================================================================================================================
+
     //全局变量
     let content;
     let keysArr = [];
     let DefaultKeys = ['GC task&&&***', 'Attach Listener&&&***', 'sun.nio.ch.EPollArrayWrapper.epollWait&&&***',
         'com.mysql.jdbc.MysqlIO.readFully&&&***', 'java.lang.Thread.State: TIMED_WAITING&&&***', 'java.lang.Thread.State: WAITING&&&***'];
     let contentArr = [];
-    // let noGCcontentArr = [];
-    // let targetArr = [];
     let contentObj = {};
     let colorArr = ['#90BAE4', '#bbc591', '#84a59a', '#b9a0b9', '#b5aea5', '#8bb9b2', '#a9d084', 'moccasin', 'thistle', '#a1b16e'];
     let colorsLength = 10;
@@ -48,25 +47,10 @@ $(document).ready(()=> {
         reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
-            // noGCcontentArr = contentArr.filter((data)=> !data.includes('GC task'));
-            // targetArr = $('#gc').prop('checked') ? noGCcontentArr : contentArr;
             $('#filtered-content').html('').css('backgroundColor', '');
             $('#list-key').click();
         }
     }
-
-    /*
-     //监听"排除GC线程"checkbox点击事件
-     $('#gc').click(function () {
-     let isChecked = $(this).prop('checked');
-     if (isChecked) {
-     targetArr = noGCcontentArr;
-     } else {
-     targetArr = contentArr;
-     }
-     $('#list-key').click();
-     });
-     */
 
     //监听默认排除关键字的点击事件
     $('.exclude').click(function () {
@@ -92,25 +76,26 @@ $(document).ready(()=> {
             alert('关键字不能为空！');
             return;
         }
-
-        if (key.split(/\s+/).length > 2) {
-            alert(`关键字形式为:
-                        1: keyword(包含）
-                        2: -v keyword 或者 keyword -v(取反，不包含)`);
-            return;
-        }
+        //
+        // if (key.split(/\s+/).length > 2) {
+        //     alert(`关键字形式为:
+        //                 1: keyword(包含）
+        //                 2: -v keyword 或者 keyword -v(取反，不包含)`);
+        //     return;
+        // }
         //没有直接replace是考虑到关键字中可能包含'-v'
         if (key.startsWith('-v') || key.endsWith('-v') || key.startsWith('-V') || key.endsWith('-V')) {
             //标记过滤关键字取反
             key = key.replace(/\-v/i, '').trim() + '&&&***';
-        } else {
-            if (key.split(/\s+/).length > 1) {
-                alert(`关键字形式为:
-                        1: keyword(包含）
-                        2: -v keyword 或者 keyword -v(取反，不包含)`);
-                return;
-            }
         }
+        // else {
+        //     if (key.split(/\s+/).length > 1) {
+        //         alert(`关键字形式为:
+        //                 1: keyword(包含）
+        //                 2: -v keyword 或者 keyword -v(取反，不包含)`);
+        //         return;
+        //     }
+        // }
 
 
         if (keysArr.includes(key)) {
@@ -118,8 +103,10 @@ $(document).ready(()=> {
             return;
         } else {
             keysArr.push(key);
-            $('#list-key').append(`<span class="keywords"><input type="checkbox" name= "key" value=${key} checked>
-                <span>${showKey}</span><button class="deleteKey" style="margin-left: 5px; background-color: lightcoral; visibility: hidden">删除</button></span>`).click();
+            let plusElement = $(`<span class="keywords"><input type="checkbox" name= "key" checked>
+                <span>${showKey}</span><button class="deleteKey" style="margin-left: 5px; background-color: lightcoral; visibility: hidden">删除</button></span>`);
+            plusElement.val(key);
+            $('#list-key').append(plusElement).click();
         }
 
         $('#keys-input').val('');
@@ -132,7 +119,12 @@ $(document).ready(()=> {
         }
         let keysArrChecked = [].concat(DefaultKeys);
         $('[name="key"]:checked').each(function () {
-            keysArrChecked.push(this.value);
+            let selectedKey = $(this).next('span').text();
+            if (selectedKey.startsWith('-v') || selectedKey.endsWith('-v') || selectedKey.startsWith('-V') || selectedKey.endsWith('-V')) {
+                //标记过滤关键字取反
+                selectedKey = selectedKey.replace(/\-v/i, '').trim() + '&&&***';
+            }
+            keysArrChecked.push(selectedKey);
         });
         $('#filtered-content').html('').css('backgroundColor', '');
         filter(keysArrChecked);
@@ -173,7 +165,7 @@ $(document).ready(()=> {
         return true;
     }
 
-    //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件
+    //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件 上传的文件改变
     $(document).on('click', 'li', function () {
         lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
