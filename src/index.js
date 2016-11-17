@@ -163,7 +163,9 @@ $(document).ready(()=> {
         } else {
             $('.keys-li').first().clone().html(`<hr/>${leftOutput}`).appendTo('.filtered-title');
         }
-        $('.keys-li li').first().click();
+        $('.keys-li').each(function () {
+            $(this).children('li').first().click();
+        })
     }
 
     //关键字匹配
@@ -179,17 +181,23 @@ $(document).ready(()=> {
 
     //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件 上传的文件改变
     $(document).on('click', '.keys-li li', function () {
+        let index;
         lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
         let rightOutput = contentObj[$(this).text()];
         if ($('input[name="info"]:checked').first().val() == tempIndex) {
             $('.filtered-content').first().nextAll().remove();
-            $('.filtered-content').html(rightOutput.replace(/\n/g, "<br>"));
+            $('.filtered-content').html(rightOutput.replace(/\n/g, "<br/>"));
 
         } else {
-            $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br>")).appendTo('.right-main');
+            index = $('ul').index($(this).parent('ul'));
+            if (index < $('.filtered-content').length) {
+                $('.filtered-content').eq(index).html(rightOutput.replace(/\n/g, '<br/>'));
+            } else {
+                $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br/>")).appendTo('.filtered-main');
+            }
         }
         $(this).css('backgroundColor', colorArr[lastIndex]);
-        $('.filtered-content').css('backgroundColor', colorArr[lastIndex]);
+        $('.filtered-content').eq(index).css('backgroundColor', colorArr[lastIndex]);
         $(this).siblings().css('backgroundColor', '#ececec');
     }).on('mouseenter mouseleave', '.keywords', function (event) {
         if (event.type === 'mouseenter') {
