@@ -52,7 +52,6 @@ $(document).ready(()=> {
         reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
-            // $('#list-key').click();
             filter();
         }
     }
@@ -83,7 +82,6 @@ $(document).ready(()=> {
         } else {
             DefaultKeys = DefaultKeys.filter((data) => data !== value);
         }
-        // $('#list-key').click();
         $('input[name="info"]:checked').each(function () {
             targetFileIndex = $(this).val();
             processFile(targetFileIndex);
@@ -154,7 +152,7 @@ $(document).ready(()=> {
         let leftOutput = '';
         let filteredContentArr = contentArr.filter((data)=>processMatch(data, keysArr));
         for (let data of filteredContentArr) {
-            let matchArr = data.match(/"(.*)".*(nid=[\w]{6})/);
+            let matchArr = data.match(/"(.*)".*(nid=[\w]{5,6})/);
             if (matchArr) {
                 contentObj[matchArr[1] + '(' + matchArr[2] + ')'] = data;
             }
