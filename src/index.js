@@ -16,11 +16,12 @@ $(document).ready(()=> {
     //全局变量
     let content;
     let keysArr = [];
+    let selectedKeys = [];
     let DefaultKeys = ['GC task&&&***', 'Attach Listener&&&***', 'sun.nio.ch.EPollArrayWrapper.epollWait&&&***',
         'com.mysql.jdbc.MysqlIO.readFully&&&***', 'java.lang.Thread.State: TIMED_WAITING&&&***', 'java.lang.Thread.State: WAITING&&&***'];
     let contentArr = [];
     let contentObj = {};
-    let colorArr = ['#90BAE4', '#bbc591', '#84a59a', '#b9a0b9', '#b5aea5', '#8bb9b2', '#a9d084', 'moccasin', 'thistle', '#a1b16e'];
+    let colorArr = ['#90BAE4', '#C591C3', '#84a59a', '#b9a0b9', '#b5aea5', '#8bb9b2', '#a9d084', 'moccasin', 'thistle', '#a1b16e'];
     let colorsLength = 10;
     let lastIndex = 0;
     let fileInfos = '';
@@ -43,7 +44,6 @@ $(document).ready(()=> {
         processFile();
     });
 
-
     function processFile(index = 0) {
         tempIndexs.push(index);
         let reader = new FileReader();//这里是核心
@@ -52,7 +52,8 @@ $(document).ready(()=> {
         reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
-            $('#list-key').click();
+            // $('#list-key').click();
+            filter();
         }
     }
 
@@ -82,7 +83,11 @@ $(document).ready(()=> {
         } else {
             DefaultKeys = DefaultKeys.filter((data) => data !== value);
         }
-        $('#list-key').click();
+        // $('#list-key').click();
+        $('input[name="info"]:checked').each(function () {
+            targetFileIndex = $(this).val();
+            processFile(targetFileIndex);
+        })
     });
 
     //点击确定开始搜索
@@ -103,39 +108,46 @@ $(document).ready(()=> {
             //标记过滤关键字取反
             key = key.replace(/\-v/i, '').trim() + '&&&***';
         }
-        if (keysArr.includes(key)) {
+        if (selectedKeys.includes(key)) {
             alert('关键字已存在！');
             return;
         } else {
-            keysArr.push(key);
+            selectedKeys.push(key);
             let plusElement = $(`<span class="keywords"><input type="checkbox" name= "key" checked />
                 <span>${showKey}</span><button class="deleteKey" style="margin-left: 5px; background-color: lightcoral; visibility: hidden">删除</button></span>`);
-            plusElement.val(key);
-            $('#list-key').append(plusElement).click();
+            $('#list-key').append(plusElement);
         }
-
         $('#keys-input').val('');
+
+        $('input[name="info"]:checked').each(function () {
+            targetFileIndex = $(this).val();
+            processFile(targetFileIndex);
+        })
     });
 
     //利用冒泡机制监听动态生成的复选框上层div的click事件
     $('#list-key').click(function (event) {
+        selectedKeys = [];
         if ($(event.target).text() === '删除' || event.target.localName === 'span') {
             return;
         }
-        let keysArrChecked = [].concat(DefaultKeys);
         $('[name="key"]:checked').each(function () {
             let selectedKey = $(this).next('span').text();
             if (selectedKey.startsWith('-v') || selectedKey.endsWith('-v') || selectedKey.startsWith('-V') || selectedKey.endsWith('-V')) {
                 //标记过滤关键字取反
                 selectedKey = selectedKey.replace(/\-v/i, '').trim() + '&&&***';
             }
-            keysArrChecked.push(selectedKey);
+            selectedKeys.push(selectedKey);
         });
-        filter(keysArrChecked);
+        $('input[name="info"]:checked').each(function () {
+            targetFileIndex = $(this).val();
+            processFile(targetFileIndex);
+        })
     });
 
     //过滤方法
-    function filter(keysArr = []) {
+    function filter() {
+        keysArr = selectedKeys.concat(DefaultKeys);
         contentObj = {};
         tempIndex = tempIndexs.shift();
         let filteredKeysArr;
@@ -158,8 +170,8 @@ $(document).ready(()=> {
 
         if ($('input[name="info"]:checked').first().val() == tempIndex) {
             $('.keys-li').first().siblings().remove();
-            $('.keys-li').html(leftOutput);
 
+            $('.keys-li').html(leftOutput);
         } else {
             $('.keys-li').first().clone().html(`<hr/>${leftOutput}`).appendTo('.filtered-title');
         }
