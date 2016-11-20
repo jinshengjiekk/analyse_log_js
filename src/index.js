@@ -8,7 +8,6 @@ $(document).ready(()=> {
             confirm("你的浏览器暂不支持HTML5 File接口，无法继续操作，请更换其他最新版本浏览器，推荐Chrome，Firefox");
             window.close();
         }
-
     })();
 
     //========================================================================================================================
@@ -46,7 +45,7 @@ $(document).ready(()=> {
         $('.filtered-content').first().nextAll().remove();
     });
 
-    function processFile(index = 0, isFilter) {
+    function processFile(index = 0, isFilter, liIndex, keyValue) {
         isFilter || fileIndexs.push(index);
         let reader = new FileReader();//这里是核心
         reader.readAsText(files[index]);//读取文件的内容
@@ -54,7 +53,7 @@ $(document).ready(()=> {
         reader.onload = function () {
             content = this.result;//当读取完成之后会回调这个函数，然后此时文件的内容存储到了result中。
             contentArr = content.split(/[\n|\r\n]{2,}/);
-            isFilter || filter();
+            isFilter ? changeContent(liIndex, keyValue) : filter();
         }
     }
 
@@ -201,30 +200,11 @@ $(document).ready(()=> {
     //监听左侧li元素点击事件  关键字鼠标悬停事件   关键字删除事件 上传的文件改变
     $(document).on('click', '.keys-li li', function () {
         let index;
+        let keyValue;
         index = $('ul').index($(this).parent('ul'));
         fileIndex = $(this).siblings('p').first().data('value');
-        processFile(fileIndex, true);
-        processMatch();
-        lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
-        let rightOutput = contentObj[$(this).text()];
-        if (index === 0) {
-            $('.filtered-content').first().html(rightOutput.replace(/\n/g, "<br/>"));
-            $('.filtered-content').first().nextAll().remove();
-        } else {
-            if (index >= $('.filtered-content').length) {
-                $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br/>")).appendTo('.filtered-main');
-            } else {
-                $('.filtered-content').eq(index).html(rightOutput.replace(/\n/g, "<br/>"));
-            }
-        }
-        // if (index === 0) {
-        //     $('.filtered-content').html(rightOutput.replace(/\n/g, "<br/>"));
-        //     $('.filtered-content').first().nextAll().remove();
-        // } else {
-        //     if (index >= $('.filtered-content').length) {
-        //         $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br/>")).appendTo('.filtered-main');
-        //     }
-        // }
+        keyValue = $(this).text();
+        processFile(fileIndex, true, index, keyValue);
         $(this).css('backgroundColor', colorArr[lastIndex]);
         $('.filtered-content').eq(index).css('backgroundColor', colorArr[lastIndex]);
         $(this).siblings().css('backgroundColor', '#ececec');
@@ -257,6 +237,33 @@ $(document).ready(()=> {
             })
         }
     });
+
+    function changeContent(index, keyValue) {
+        processMatch();
+        lastIndex < colorsLength - 1 ? lastIndex++ : lastIndex = 0;
+        let rightOutput = contentObj[keyValue];
+        if (index === 0) {
+            $('.filtered-content').first().html(rightOutput.replace(/\n/g, "<br/>"));
+            if ($('.keys-li').length <= 1) {
+                $('.filtered-content').first().nextAll().remove();
+            }
+        } else {
+            if (index >= $('.filtered-content').length) {
+                $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br/>")).appendTo('.filtered-main');
+            } else {
+                $('.filtered-content').eq(index).html(rightOutput.replace(/\n/g, "<br/>"));
+            }
+        }
+        // if (index === 0) {
+        //     $('.filtered-content').html(rightOutput.replace(/\n/g, "<br/>"));
+        //     $('.filtered-content').first().nextAll().remove();
+        // } else {
+        //     if (index >= $('.filtered-content').length) {
+        //         $('.filtered-content').first().clone().html(rightOutput.replace(/\n/g, "<br/>")).appendTo('.filtered-main');
+        //     }
+        // }
+
+    }
 
     //监听键盘回车键，默认按下就是确定搜索
     $(document).keydown((event) => {
