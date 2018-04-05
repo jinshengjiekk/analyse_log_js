@@ -1,1 +1,3 @@
-.idea
+*.idea
+*.iml
+analyse-jstack-react/node_modules

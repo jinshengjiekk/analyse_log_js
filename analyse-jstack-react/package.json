@@ -1,0 +1,40 @@
+{
+  "name": "analyse-java-jstack",
+  "version": "0.0.1",
+  "description": "powered by JSJ",
+  "dependencies": {
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "immutable": "~3.7.4",
+    "lodash": "^4.17.5",
+    "antd": "^3.3.3",
+    "assets-webpack-plugin": "^3.5.1",
+    "babel-core": "^6.26",
+    "babel-eslint": "^8.1.2",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-import": "^1.6.3",
+    "babel-plugin-transform-imports": "^1.4.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.5.0",
+    "babel-preset-react-hmre": "^1.1.1",
+    "babel-preset-stage-1": "^6.5.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "css-loader": "^0.23.1",
+    "webpack-dev-server": "^2.9.2",
+    "script-ext-html-webpack-plugin": "^1.8.5",
+    "json-loader": "^0.5.4",
+    "less": "^3.0.1",
+    "less-loader": "^4.1.0",
+    "style-loader": "^0.13.1",
+    "url-loader": "^0.5.7",
+    "webpack": "^3.7.1",
+    "babel-polyfill":"^6.26.0",
+    "html-webpack-plugin": "^2.22.0"
+  },
+  "scripts": {
+    "start": "webpack-dev-server --config webpack.dev.js --disable-host-check",
+    "build": "webpack --config webpack.config.js --progress --colors --display-error-details"
+  },
+  "author": "jinshengjie",
+  "license": "MIT"
+}
